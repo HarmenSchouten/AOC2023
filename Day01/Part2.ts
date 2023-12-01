@@ -12,7 +12,7 @@ const numbers:Record<string, number> = {
 };
 
 const answer = text
-    .split(/\r\n/g)
+    .split("\r\n")
     .reduce((sum, line) => {
         const nums = [];
         for (let i = 0; i < line.length; i++) {
