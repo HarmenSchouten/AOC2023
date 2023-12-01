@@ -13,19 +13,19 @@ const numbers:Record<string, number> = {
 
 const answer = text
     .split("\r\n")
-    .reduce((sum, line) => {
+    .reduce((acc, state) => {
         const nums = [];
-        for (let i = 0; i < line.length; i++) {
-            Object.keys(numbers).forEach(num => {
-                if (line.slice(i).startsWith(num)) {
-                    nums.push(numbers[num]);
-                }
-            });
-            if (!isNaN(Number(line[i]))) {
-                nums.push(parseInt(line[i]));
+        for (let i = 0; i < state.length; i++) {
+            Object
+                .keys(numbers)
+                .filter(number => state.slice(i).startsWith(number))
+                .forEach(number => nums.push(numbers[number]))
+
+            if (!isNaN(Number(state[i]))) {
+                nums.push(Number(state[i]));
             }
         }
-        return sum + nums[0] * 10 + nums[nums.length - 1];
+        return acc + nums[0] * 10 + nums[nums.length - 1];
     }, 0);
 
 console.log(answer);
