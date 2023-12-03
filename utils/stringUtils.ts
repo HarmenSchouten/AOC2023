@@ -6,6 +6,8 @@ declare global {
         splitLb(): string[];
         /** Split on double line break */
         splitDlb(): string[];
+        /** Check if string is a number */
+        isDigit(): boolean;
     }
 }
 
@@ -19,4 +21,8 @@ String.prototype.splitLb = function () {
 
 String.prototype.splitDlb = function () {
     return this.split("\r\n\r\n");
+}
+
+String.prototype.isDigit = function () {
+    return /^\d+$/.test(this.toString());
 }
