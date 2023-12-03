@@ -3,7 +3,7 @@ import { GridCell } from "./types.ts";
 
 declare global {
     interface String {
-        toGrid<T>(mapper?: (value: string) => T): GridCell<T>[]
+        toGrid<T = string>(mapper?: (value: string) => T): GridCell<T>[]
     }
 }
 

@@ -2,7 +2,7 @@ import "../utils/index.ts"
 
 const text = await Deno.readTextFile("./Day03/input.txt")
 
-const grid = text.toGrid<string>()
+const grid = text.toGrid()
 
 const identifiers = grid.filter(item => item.value === "*" && item.value.ints().length === 0)
 
