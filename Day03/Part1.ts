@@ -2,28 +2,16 @@ import "../utils/index.ts"
 
 const text = await Deno.readTextFile("./Day03/input.txt")
 
-const grid = text
-    .splitLb()
-    .flatMap((line, y) => line.split("").map((item, x) => ({x: x, y: y, value: item})))
+const grid = text.toGrid<string>()
 
 const identifiers = grid.filter(item => item.value !== "." && item.value.ints().length === 0)
 
 const manhattan = (x0: number, x1: number, y0: number, y1: number) => Math.abs(x1-x0) + Math.abs(y1-y0);
 
 const answer = identifiers
-    .map(item => [
-        grid.filter(gridItem => gridItem.x === item.x && gridItem.y === item.y - 1)?.[0],
-        grid.filter(gridItem => gridItem.x === item.x && gridItem.y === item.y + 1)?.[0],
-        grid.filter(gridItem => gridItem.x === item.x - 1 && gridItem.y === item.y)?.[0],
-        grid.filter(gridItem => gridItem.x === item.x + 1 && gridItem.y === item.y)?.[0],
-        grid.filter(gridItem => gridItem.x === item.x - 1 && gridItem.y === item.y - 1)?.[0],
-        grid.filter(gridItem => gridItem.x === item.x + 1 && gridItem.y === item.y - 1)?.[0],
-        grid.filter(gridItem => gridItem.x === item.x - 1 && gridItem.y === item.y + 1)?.[0],
-        grid.filter(gridItem => gridItem.x === item.x + 1 && gridItem.y === item.y + 1)?.[0],
-    ])
-    .flatMap(item => item.filter(item => item !== undefined && item.value.ints().length > 0))
+    .flatMap(item => item.getAllNeighbours(false, item => item !== undefined && item.value.ints().length > 0))
     .filter((item, idx, array) => array.findIndex(aItem => aItem.x === item.x && aItem.y === item.y) === idx)
-    .reduce((acc ,state) => {
+    .reduce((acc, state) => {
         const has0Distance = acc.find(item => manhattan(item.x, state.x, item.y, state.y) <= 1)
         if (has0Distance) return acc
         return [...acc, state]
