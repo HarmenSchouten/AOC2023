@@ -2,7 +2,7 @@ import "../utils/index.ts"
 
 const text = await Deno.readTextFile("./Day04/input.txt")
 
-const input = text
+const mapValues = text
     .splitLb()
     .map(line => {
         const [id, rest] = line.split(": ")
@@ -11,34 +11,15 @@ const input = text
             winning: rest.split(" | ")[0].split(" ").filter(item => item !== "").map(Number),
             values: rest.split(" | ")[1].split(" ").filter(item => item !== "").map(Number),
         }
-    });
-
-
-let remainingCards = input;
-let answer = input.length;
-while (true) {
-    const result = remainingCards.map(item => {
-        return item.winning.reduce((acc, state) => {
-            if (item.values.includes(state)) {
-                return acc.points === 0
-                    ? {points: 1, total: 1, id: item.id}
-                    : {...acc, points: acc.points + acc.points, total: acc.total + 1}
-            }
-            return acc
-        }, {points: 0, total: 0, id: -1} as {points: number, total: number, id: number})
     })
+    .reduce((acc, state) => {
+        const winningNumbersLength = state.winning.filter(item => state.values.includes(item)).length
+        acc.set(state.id, (acc.get(state.id) ?? 0) + 1)
+        for (let i = 1; i <= winningNumbersLength; i++) {
+            acc.set(state.id + i, (acc.get(state.id + i) ?? 0) + 1 * (acc.get(state.id) ?? 1))
+        }
+        return acc
+    }, new Map<number, number>())
+    .values();
 
-    remainingCards = result.flatMap(item => {
-        const start = item.id
-        const end = item.total + start
-        return input.filter(item => item.id > start && item.id <= end)
-    })
-
-    answer += result.map(item => item.total).sum()
-
-    if (remainingCards.length === 0) {
-        break
-    }
-}
-
-console.log(answer)
+console.log([...mapValues].sum())
