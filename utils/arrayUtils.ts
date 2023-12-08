@@ -1,3 +1,5 @@
+import { lcm } from "./common.ts";
+
 declare global {
     interface Array<T> {
         /** Gets the sum of all integers in an array */
@@ -6,6 +8,8 @@ declare global {
         product(): number
         /** Splits an array into chunks of a given size */
         chunk(size: number): Array<Array<T>>
+        /** Gets the lowest common multiply of the given set of numbers */
+        lcm(): number
     }
 }
 
@@ -29,4 +33,16 @@ Array.prototype.chunk = function (size: number) {
         chunks.push(this.slice(i, i + size))
     }
     return chunks
+}
+
+Array.prototype.lcm = function () {
+    if (!this.every((value) => typeof value === 'number')) {
+        throw new Error("This array does not contain only numbers")
+    }
+
+    let result = this[0];
+    for (let i = 1; i < this.length; i++) {
+        result = lcm(result, this[i]);
+    }
+    return result;
 }
