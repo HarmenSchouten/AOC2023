@@ -39,27 +39,4 @@ startNodes.forEach(node => {
     }
 })
 
-console.log(lcmOfArray([...idxMap.values()]))
-
-// Calculate GCD using Euclidean algorithm
-function gcd(a: number, b: number): number {
-    while (b !== 0) {
-        [a, b] = [b, a % b];
-    }
-    return a;
-}
-
-// Calculate LCM of two numbers
-function lcm(a: number, b: number): number {
-    const gcdAB = gcd(a, b);
-    return (a * b) / gcdAB;
-}
-
-// Calculate LCM of an array of numbers
-function lcmOfArray(numbers: number[]): number {
-    let result = numbers[0];
-    for (let i = 1; i < numbers.length; i++) {
-        result = lcm(result, numbers[i]);
-    }
-    return result;
-}
+console.log([...idxMap.values()].lcm())
