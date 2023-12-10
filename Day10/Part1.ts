@@ -56,3 +56,29 @@ while (true) {
 const length = loop.length / 2
 
 console.log(length)
+
+const visualizer = (grid: string[], values: Point[]) => {
+
+    const replaceCell = (cell: string) => {
+        if (cell === "L") return "╰"
+        else if (cell === "J") return "╯"
+        else if (cell === "7") return "╮"
+        else if (cell === "F") return "╭"
+        else if (cell === "|") return "│"
+        else if (cell === "-") return "─"
+        else if (cell === "S") return "S"
+        else return cell
+    }
+    const coloredGrid = grid
+        .map((line, y) => 
+            [...line]
+                .map((cell, x) => 
+                    values.find(v => v.x === x && v.y === y) !== undefined || cell === "S"
+                        ? `\x1b[38;5;200m${replaceCell(cell)}`
+                        : `\x1b[0m\x1b[1m${replaceCell(cell)}`)
+                .join(""))
+
+    console.log(coloredGrid.join("\n"))
+}
+
+if (Deno.args.includes("--visualize")) visualizer(grid, loop)
