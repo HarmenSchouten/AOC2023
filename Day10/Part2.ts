@@ -53,27 +53,22 @@ while (true) {
     if (x === start?.x && y === start?.y) break;
 }
 
-const length = loop.length / 2
-
 // https://en.wikipedia.org/wiki/Shoelace_formula
 // https://rosettacode.org/wiki/Shoelace_formula_for_polygonal_area
-const shoeLaceStuff = (x: number[], y: number[]) => {
-    if (x.length !== y.length || x.length < 3) throw new Error("Invalid input")
+const GetAreaForLoop = (array: Point[]) => {
+    const copy = [...array.slice(1), array[0]]
+    let count = 0
+    for (let i = 0; i < array.length; i++) {
+        const x0 = array[i].x
+        const y0 = array[i].y
+        const x1 = copy[i].x
+        const y1 = copy[i].y
 
-    const n = x.length
-    let area = 0;
-
-    for (let i = 0; i < n - 1; i++) {
-        area += x[i] * y[i + 1] - x[i + 1] * y[i]
+        count += ((x0 * y1) - (x1 * y0))
     }
-
-    area += x[n - 1] * y[0] - x[0] * y[n - 1]
-
-    return Math.abs(area / 2)
+    return Math.abs(count)
 }
 
-const xArray = loop.map(item => item.x)
-const yArray = loop.map(item => item.y)
-
 // https://en.wikipedia.org/wiki/Pick%27s_theorem
-console.log(Math.floor((shoeLaceStuff(xArray, yArray) - length) / 2) + 1)
+const area = GetAreaForLoop(loop) - loop.length 
+console.log(Math.floor((area / 2) + 1))
