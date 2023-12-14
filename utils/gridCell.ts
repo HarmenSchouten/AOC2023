@@ -2,10 +2,10 @@ import { Grid } from "./grid.ts";
 
 export class GridCell<T> {
 
-    parent: Grid<T>;
-    x: number
-    y: number
-    value: T
+    private parent: Grid<T>;
+    public x: number
+    public y: number
+    public value: T
 
     constructor(parent: Grid<T>, x: number, y: number, value: T) {
         this.parent = parent;
