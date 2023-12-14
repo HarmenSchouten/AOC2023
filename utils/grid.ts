@@ -1,11 +1,16 @@
 import { GridCell } from "./types.ts";
 
+/** A grid of cells with a given value */
 export class Grid<T> {
 
+    /** The width of the grid */
     width = 0
+    /** The height of the grid */
     height = 0
+    /** The cells in the grid */
     cells: GridCell<T>[] = []
 
+    /** Initialize a grid from a string, with a possible mapper for the value */
     constructor(input: string, mapper?: (value: string) => T) {
         const items = [] as GridCell<T>[]
         const lines = input.splitLb();
@@ -32,41 +37,52 @@ export class Grid<T> {
         this.cells = items
     }
 
-    /** Transpose the grid by rotating it to the right */
+    /** Transpose the grid by rotating it to the right over its center */
     transposeRight() {
-        const centerX = this.width / 2
-        const centerY = this.height / 2
+        const width = this.width;
+        const height = this.height;
+
+        const centerX = (width - 1) / 2
+        const centerY = (height - 1) / 2
 
         const items = [] as GridCell<T>[]
         for (let i = 0; i < this.cells.length; i++) {
             const cell = this.cells[i];
-            const newX: number = centerX - (cell.y - centerY);
-            const newY: number = centerY + (cell.x - centerX);
-            items.push({ ...cell, x: newX, y: newY })
+            const newX = centerX - (cell.y - centerY);
+            const newY = centerY + (cell.x - centerX);
+            items.push({ ...cell, x: newX, y: newY, value: cell.value })
         }
         
         this.cells = items;
-        const width = this.width;
-        const height = this.height;
         this.width = height;
         this.height = width;
     }
 
+    /** Transpose the grid by rotating it to the left over its center */
     transposeLeft() {
-        const centerX = Math.floor(this.width / 2)
-        const centerY = Math.floor(this.height / 2)
-        this.cells = this.cells.map(cell => {
-            const newX = centerX - (centerY - cell.y)
-            const newY = centerY - (cell.x - centerX)
-            return { ...cell, x: newX, y: newY }
-        })
-        return this;
+        const width = this.width;
+        const height = this.height;
+
+        const centerX = (width - 1) / 2
+        const centerY = (height - 1) / 2
+        const items = [] as GridCell<T>[]
+        for (let i = 0; i < this.cells.length; i++) {
+            const cell = this.cells[i];
+            const newX = centerX + (cell.y - centerY);
+            const newY = centerY - (cell.x - centerX);
+            items.push({ ...cell, x: newX, y: newY, value: cell.value })
+        }
+
+        this.cells = items;
+        this.width = height;
+        this.height = width;
     }
 
+    /** Update the value of a cell at a specific x, y coordinate */
     updateCell(x: number, y: number, value: T) {
         const cellIndex = this.cells.findIndex(c => c.x === x && c.y === y)
         if (cellIndex === -1) return;
-        this.cells.splice(cellIndex, 1, { ...this.cells[cellIndex], value })
+        this.cells.splice(cellIndex, 1, { ...this.cells[cellIndex], value: value })
     }
 
     /** Convert the grid back to a string representation */
