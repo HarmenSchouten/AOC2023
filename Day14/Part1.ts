@@ -1,43 +1,31 @@
+import { Grid } from "../utils/grid.ts"
 import "../utils/index.ts"
 
 const text = await Deno.readTextFile("./Day14/input.txt")
 
-const grid = text
-    .splitLb()
-    .flatMap((line, y) => [...line].map((c, x) => ({ x, y, c })))
+const grid = new Grid<string>(text)
 
-
-const rocks = grid.filter(c => c.c === "O")
-
-let currentGrid = grid;
+const rocks = grid.cells.filter(c => c.value === "O")
 
 rocks.forEach(rock => {
     if (rock.y === 0) return;
 
-    const gridCopy = [...currentGrid]
-    const block = gridCopy.findLast(c => c.x === rock.x && c.y < rock.y && c.c !== ".")
+    const block = grid.cells.findLast(c => c.x === rock.x && c.y < rock.y && c.value !== ".")
     
     if (!block) {
-        const aboveIdx = gridCopy.findIndex(c => c.x === rock.x && c.y === 0 )
-        gridCopy.splice(aboveIdx, 1, {...gridCopy[aboveIdx], c: "O"})
-        const idx = gridCopy.findIndex(c => c.x === rock.x && c.y === rock.y)
-        gridCopy.splice(idx, 1, {...rock, c: "."})
-        currentGrid = gridCopy
+        grid.updateCell(rock.x, 0, "O")
+        grid.updateCell(rock.x, rock.y, ".")
         return
     }
     
     if (block.y === rock.y - 1) return;
-    const above = gridCopy.findIndex(c => c.x === rock.x && c.y === block.y + 1)
-    gridCopy.splice(above, 1, {...gridCopy[above], c: "O"})
-    const idx = gridCopy.findIndex(c => c.x === rock.x && c.y === rock.y)
-    gridCopy.splice(idx, 1, {...rock, c: "."})
-
-    currentGrid = gridCopy
+    
+    grid.updateCell(rock.x, block.y + 1, "O")
+    grid.updateCell(rock.x, rock.y, ".")
 })
 
-const maxY = Math.max(...currentGrid.map(c => c.y))
-const answer = currentGrid.filter(c => c.c === "O")
-    .map(c => maxY + 1 - c.y)
+const answer = grid.cells.filter(c => c.value === "O")
+    .map(c => grid.height - c.y)
     .sum()
 
 console.log(answer)
