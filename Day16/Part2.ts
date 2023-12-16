@@ -20,6 +20,56 @@ const getNextCell = (item: QueueItem) => {
     if (item.direction === "R") return item.cell.right()
 }
 
+const cache = new Map<string, QueueItem[]>()
+
+const processCell = (key: string, cell: GridCell<string>, direction: string) => {
+    if (cache.has(key)) {
+        return cache.get(key)!
+    }
+
+    const nextCell = getNextCell({ cell: cell, direction: direction })
+    if (!nextCell) {
+        cache.set(key, [])
+        return []
+    }
+
+    const values = [] as QueueItem[]
+    switch (nextCell.value) {
+        case "/": {
+            values.push({ cell: nextCell, direction: direction === "U" ? "R" : direction === "R" ? "U" : direction === "D" ? "L" : "D"})
+            break;
+        }
+        case "\\": {
+            values.push({ cell: nextCell, direction: direction === "U" ? "L" : direction === "L" ? "U" : direction === "D" ? "R" : "D"})
+            break;
+        }
+        case "-": {
+            if (direction === "U" || direction === "D") {
+                values.push({ cell: nextCell, direction: "R" })
+                values.push({ cell: nextCell, direction: "L" })
+            } else {
+                values.push({ cell: nextCell, direction: direction })
+            }
+            break;
+        }
+        case "|": {
+            if (direction === "L" || direction === "R") {
+                values.push({ cell: nextCell, direction: "U" })
+                values.push({ cell: nextCell, direction: "D" })
+            } else {
+                values.push({ cell: nextCell, direction: direction })
+            }
+            break;
+        }
+        case ".": {
+            values.push({ cell: nextCell, direction: direction })
+            break;
+        }
+    }
+    cache.set(key, values)
+    return values
+}
+
 const doRunForStartCoord = (x: number, y: number, direction: string) => {
     const queue = [{
         cell: grid.cells.find(item => item.x === x && item.y === y)!,
@@ -31,58 +81,18 @@ const doRunForStartCoord = (x: number, y: number, direction: string) => {
     while (queue.length > 0) {
         const cell = queue.shift()!
     
-        const nextCell = getNextCell(cell)
-
         const key = cellToKey(cell.cell, cell.direction)
     
         if (visited.has(key)) continue;
     
         visited.add(key)
 
-        if (!nextCell) continue;
-    
-        switch (nextCell.value) {
-            case "/": {
-                queue.push({ cell: nextCell, direction: cell.direction === "U" ? "R" : cell.direction === "R" ? "U" : cell.direction === "D" ? "L" : "D"})
-                break;
-            }
-            case "\\": {
-                queue.push({ cell: nextCell, direction: cell.direction === "U" ? "L" : cell.direction === "L" ? "U" : cell.direction === "D" ? "R" : "D"})
-                break;
-            }
-            case "-": {
-                if (cell.direction === "U" || cell.direction === "D") {
-                    queue.push({ cell: nextCell, direction: "R" })
-                    queue.push({ cell: nextCell, direction: "L" })
-                } else {
-                    queue.push({ cell: nextCell, direction: cell.direction })
-                }
-                break;
-            }
-            case "|": {
-                if (cell.direction === "L" || cell.direction === "R") {
-                    queue.push({ cell: nextCell, direction: "U" })
-                    queue.push({ cell: nextCell, direction: "D" })
-                } else {
-                    queue.push({ cell: nextCell, direction: cell.direction })
-                }
-                break;
-            }
-            case ".": {
-                visited.add(cellToKey(cell.cell, cell.direction))
-                queue.push({ cell: nextCell, direction: cell.direction })
-                break;
-            }
-        }
+        const values = processCell(key, cell.cell, cell.direction)
+        queue.push(...values)
     }
 
-    return [...visited.values()]
-        .map(item => {
-            const [x, y] = item.split(".")[0].split(",").map(Number)
-            return { x: x, y: y }
-        })
-        .filter((item, idx, arr) => arr.findIndex(i => i.x === item.x && i.y === item.y) === idx)
-        .length
+    const items = [...visited.keys()].map(item => item.split(".")[0])
+    return new Set(items).size
 }
 
 let answer = 0;
