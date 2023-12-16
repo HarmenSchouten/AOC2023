@@ -14,14 +14,32 @@ export class GridCell<T> {
         this.value = value;
     }
 
+    /**
+     * Get all adjacent neighbours of this cell
+     * @param includeSelf Include the current cell in the result
+     * @param filterfn Filter the result
+     * @returns A list of adjacent neighbours
+     */
     getAdjacentNeighbours(includeSelf = false, filterfn?: (cell: GridCell<T>) => boolean) {
         return getAdjacentNeighbours(this.parent.cells, this.x, this.y, includeSelf, filterfn)
     }
 
+    /**
+     * Get all diagonal neighbours of this cell
+     * @param includeSelf Include the current cell in the result
+     * @param filterfn Filter the result
+     * @returns A list of diagonal neighbours
+     */
     getDiagonalNeighbours(includeSelf = false, filterfn?: (cell: GridCell<T>) => boolean) {
         return getDiagonalNeighbours(this.parent.cells, this.x, this.y, includeSelf, filterfn)
     }
 
+    /**
+     * Get all adjacent and diagonal neighbours of this cell
+     * @param includeSelf Include the current cell in the result
+     * @param filterfn Filter the result
+     * @returns A list of adjacent and diagonal neighbours
+     */
     getAllNeighbours(includeSelf = false, filterfn?: (cell: GridCell<T>) => boolean) {
         return [
             ...getAdjacentNeighbours(this.parent.cells, this.x, this.y, includeSelf, filterfn), 
@@ -29,6 +47,53 @@ export class GridCell<T> {
         ]
     }
 
+    /**
+     * Check if this cell is on the edge of the grid
+     * @returns True if this cell is on the edge of the grid
+     */
+    isEdge() {
+        return this.x === 0 && this.y === 0
+            || this.x === 0 && this.y === this.parent.height - 1
+            || this.x === this.parent.width - 1 && this.y === 0
+            || this.x === this.parent.width - 1 && this.y === this.parent.height - 1
+    }
+
+    /**
+     * Get the cell above this cell
+     * @returns The cell above this cell
+     */
+    up() {
+        return this.parent.cells.find(cell => cell.x === this.x && cell.y === this.y - 1)
+    }
+
+    /**
+     * Get the cell below this cell
+     * @returns The cell below this cell
+     */
+    down() {
+        return this.parent.cells.find(cell => cell.x === this.x && cell.y === this.y + 1)
+    }
+
+    /**
+     * Get the cell to the left of this cell
+     * @returns The cell to the left of this cell
+     */
+    left() {
+        return this.parent.cells.find(cell => cell.x === this.x - 1 && cell.y === this.y)
+    }
+
+    /**
+     * Get the cell to the right of this cell
+     * @returns The cell to the right of this cell
+     */
+    right() {
+        return this.parent.cells.find(cell => cell.x === this.x + 1 && cell.y === this.y)
+    }
+
+    /**
+     * Get a string representation of this cell
+     * @returns A string representation of this cell
+     */
     toString() {
         return `${this.x}, ${this.y}, [${this.value}]`
     }
