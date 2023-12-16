@@ -28,6 +28,10 @@ export class GridCell<T> {
             ...getDiagonalNeighbours(this.parent.cells, this.x, this.y, false, filterfn)
         ]
     }
+
+    toString() {
+        return `${this.x}, ${this.y}, [${this.value}]`
+    }
 }
 
 function getAdjacentNeighbours<T>(
