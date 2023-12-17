@@ -6,92 +6,81 @@ const text = await Deno.readTextFile("./Day17/input.txt")
 
 const grid = new Grid<number>(text, value => Number(value))
 
-const cellToKey = (cell: GridCell<number>, direction: string, directionCount: number) => `${cell.x},${cell.y}.${direction}.${directionCount}`
-
-type QueueItem = {
-    key: number
-    stepsTaken: number
-    heatLoss: number
-    cell: GridCell<number>
-    direction: "R" | "L" | "D" | "U"
-    sameDirectionCount: number
-}
-
-const queue = [] as QueueItem[]
 const start = grid.cells.find(item => item.x === 0 && item.y === 0)!
 const end = grid.cells.find(item => item.x === grid.width - 1 && item.y === grid.height - 1)!
-queue.push({key: 0, stepsTaken: 0, heatLoss: 0, cell: start, direction: "R", sameDirectionCount: 1})
 
-const reached = new Set<string>()
+const cellToKey = (cell: GridCell<number>, direction: string, directionCount: number) => 
+    `${cell.x}.${cell.y}.${direction}.${directionCount}`
+
+const queue = {} as Record<string, number>
+queue[cellToKey(start, "R", 0)] = 0;
+
+const steamMap = {} as Record<string, number>
+steamMap[cellToKey(start, "R", 0)] = 0;
 
 const getLowest = () => {
-    queue.sort((a, b) => a.key - b.key)
-    const lowest = queue.shift()
-    return lowest
+    const arr = Object.keys(queue);
+    if (arr.length > 0) {
+        const lowestItem = arr.reduce((acc, item) => queue[item] < queue[acc] ? item : acc)
+    
+        delete queue[lowestItem]
+        
+        return lowestItem    
+    }
+    return undefined
+}
+
+const getNewDirection = (isInSameDirection: boolean, direction: string, cell:GridCell<number>, adjacent: GridCell<number>) => {
+    if (isInSameDirection) return direction
+    if (adjacent.x > cell.x) return "R"
+    if (adjacent.x < cell.x) return "L"
+    if (adjacent.y > cell.y) return "D"
+    if (adjacent.y < cell.y) return "U"
 }
 
 let answer = 0;
+
 while (true) {
-    const lowest = getLowest() 
+    const cellString = getLowest()
 
-    if (!lowest) break;
-    
-    if (reached.has(cellToKey(lowest.cell, lowest.direction, lowest.sameDirectionCount))) continue
-    
-    reached.add(cellToKey(lowest.cell, lowest.direction, lowest.sameDirectionCount))
-    
-    const cell = lowest.cell;
+    if (!cellString) break;
 
-    if (cell.x === end.x && cell.y === end.y) {
-        answer = lowest.heatLoss
+    const [x, y, direction, directionCount] = cellString.split(".")
+
+    if (x === String(end.x) && y === String(end.y)) {
+        answer = steamMap[cellString]
         break;
     }
 
-    const neighbours = cell.getAdjacentNeighbours()
+    const cell = grid.cells.find(item => item.x === Number(x) && item.y === Number(y))!
 
-    for (const neighbour of neighbours) {
-        if (!neighbour) continue;
+    const adjacents = cell.getAdjacentNeighbours()
+    for (const adjacent of adjacents) {
+        const isInSameDirection = adjacent.x > cell.x && direction === "R"
+            || adjacent.x < cell.x && direction === "L"
+            || adjacent.y > cell.y && direction === "D"
+            || adjacent.y < cell.y && direction === "U"
 
-        const isInSameDirection = neighbour.x > cell.x && lowest.direction === "R"
-            || neighbour.x < cell.x && lowest.direction === "L"
-            || neighbour.y > cell.y && lowest.direction === "D"
-            || neighbour.y < cell.y && lowest.direction === "U"
+        if (isInSameDirection && Number(directionCount) >= 3) continue;
 
-        if (isInSameDirection && lowest.sameDirectionCount >= 3) {
-            continue;
+        const isReverse = adjacent.x > cell.x && direction === "L"
+            || adjacent.x < cell.x && direction === "R"
+            || adjacent.y > cell.y && direction === "U"
+            || adjacent.y < cell.y && direction === "D"
+
+        if (isReverse) continue;
+
+        const newDirection = getNewDirection(isInSameDirection, direction, cell, adjacent)!
+        
+        const newDirectionCount = isInSameDirection ? Number(directionCount) + 1 : 1
+
+        const totalSteamLoss = steamMap[cellToKey(cell, direction, Number(directionCount))] + adjacent.value
+        if (totalSteamLoss < (steamMap[cellToKey(adjacent, newDirection, newDirectionCount)] || Number.MAX_SAFE_INTEGER)) {
+            const key = cellToKey(adjacent, newDirection, newDirectionCount)
+            steamMap[key] = totalSteamLoss
+            queue[key] = totalSteamLoss
         }
-
-        const isReverse = neighbour.x > cell.x && lowest.direction === "L"
-            || neighbour.x < cell.x && lowest.direction === "R"
-            || neighbour.y > cell.y && lowest.direction === "U"
-            || neighbour.y < cell.y && lowest.direction === "D"
-
-        if (isReverse) {
-            continue;
-        }
-
-        const newHeatLoss = lowest.heatLoss + neighbour.value;
-
-        const newDirection = neighbour.x > cell.x 
-            ? "R" 
-            : neighbour.x < cell.x 
-                ? "L" 
-                : neighbour.y > cell.y 
-                    ? "D" 
-                    : "U"
-
-        queue.push({
-            key: newHeatLoss,
-            cell: neighbour, 
-            stepsTaken: lowest.stepsTaken + 1, 
-            heatLoss: newHeatLoss, 
-            direction: newDirection, 
-            sameDirectionCount: isInSameDirection 
-                ? lowest.sameDirectionCount + 1 
-                : 1
-        })
     }
 }
 
-// TODO: Fix the off by one for my input
-console.log(answer - 1)
+console.log(answer)
