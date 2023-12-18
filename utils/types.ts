@@ -6,3 +6,8 @@ export type GridCell<T> = {
     getDiagonalNeighbours(includeSelf?: boolean, filterfn?: (cell: GridCell<T> | undefined) => boolean): (GridCell<T>)[]
     getAllNeighbours(includeSelf?: boolean, filterfn?: (cell: GridCell<T> | undefined) => boolean): (GridCell<T>)[]
 }
+
+export type Point = {
+    x: number
+    y: number
+}
