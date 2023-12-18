@@ -1,9 +1,5 @@
 import "../utils/index.ts"
-
-type Point = {
-    x: number,
-    y: number
-}
+import { Point, picksTheoremInnerBoundaries } from "../utils/index.ts";
 
 const text = await Deno.readTextFile("./Day18/input.txt")
 
@@ -48,19 +44,6 @@ input.forEach(line => {
     }
 })
 
-const GetAreaForLoop = (array: Point[]) => {
-    const copy = [...array.slice(1), array[0]]
-    let count = 0
-    for (let i = 0; i < array.length; i++) {
-        const x0 = array[i].x
-        const y0 = array[i].y
-        const x1 = copy[i].x
-        const y1 = copy[i].y
+const answer = picksTheoremInnerBoundaries(items, items.length) + items.length
 
-        count += ((x0 * y1) - (x1 * y0))
-    }
-    return Math.abs(count)
-}
-const area = GetAreaForLoop(items) - items.length 
-const answer = (items.length) + Math.floor((area / 2) + 1)
 console.log(answer) 
