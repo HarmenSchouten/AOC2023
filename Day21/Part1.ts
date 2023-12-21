@@ -21,6 +21,7 @@ const set = new Set<string>()
 set.add(cellToKey(start!))
 
 for (let i = 0; i < 64; i++) {
+    console.log(i)
     const entries = [...set.keys()]
     set.clear()
 
