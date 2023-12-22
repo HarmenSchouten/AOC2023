@@ -33,11 +33,7 @@ bricks.forEach(b => {
         for (let y = b.start.y; y <= b.end.y; y++) {
             for (let z = b.start.z; z <= b.end.z; z++) {
                 const key = `${x},${y},${z}`;
-                if (occupation.has(key)) {
-                    console.error("overlap");
-                } else {
-                    occupation.set(key, b);
-                }
+                occupation.set(key, b);
             }
         }
     }
